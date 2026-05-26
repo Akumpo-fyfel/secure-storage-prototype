@@ -1,6 +1,11 @@
 import sqlite3
+from pathlib import Path
 
-DB_PATH = "storage/encrypted_metadata/files.db"
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = BASE_DIR / "storage" / "encrypted_metadata" / "files.db"
+
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
