@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+</head>
+<body>
+    <h1>Управление пользователями и параметрами безопасности</h1>
+
+    <p><a href="/dashboard">Назад</a></p>
+
+	<hr>
+
+	<h2>Управление ключевой информацией</h2>
+
+	<p>
+		Смена мастер-ключа выполняет перезашифрование файловых ключей новым мастер-ключом.
+		Пользовательские файлы при этом не перешифровываются.
+	</p>
+
+	<form action="/rotate_master_key" method="post"
+		onsubmit="return confirm('Вы действительно хотите выполнить смену мастер-ключа? Операция затронет все файловые ключи.');">
+		<button type="submit">Сменить мастер-ключ</button>
+	</form>
+	
+    {% if message %}
+        <p style="color: green;">{{ message }}</p>
+    {% endif %}
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <h2>Создать пользователя</h2>
+
+    <form method="post">
+        <p>Логин</p>
+        <input type="text" name="username">
+
+        <p>Пароль</p>
+        <input type="password" name="password">
+
+        <p>Роль</p>
+        <select name="role">
+            {% for role in roles %}
+                <option value="{{ role }}">{{ role }}</option>
+            {% endfor %}
+        </select>         
+
+		<p>
+			<label>
+				<input type="checkbox" name="is_one_time">
+				Одноразовая учётная запись
+			</label>
+		</p>
+
+        <br><br>
+
+        <button type="submit">Создать</button>
+    </form>
+
+    <h2>Список пользователей</h2>
+
+	<table border="1" cellpadding="6">
+		<tr>
+			<th>ID</th>
+			<th>Логин</th>
+			<th>Роль</th>
+			<th>Статус</th>
+			<th>Ошибки входа</th>
+			<th>Начало окна ошибок</th>
+			<th>Смена пароля</th>
+			<th>Удаление</th>
+			<th>Разблокировка</th>
+		</tr>
+
+		{% for user in users %}
+		<tr>
+			<td>{{ user[0] }}</td>
+			<td>{{ user[1] }}</td>
+			<td>{{ user[2] }}</td>
+
+			<td>
+				{% if user[3] == "active" %}
+					активен 
+				{% elif user[3] == "one_time" %}
+					одноразовый
+				{% elif user[3] == "used" %}
+					использован
+				{% elif user[3] == "blocked" %}
+					заблокирован
+				{% else %}
+					{{ user[3] }}
+				{% endif %}
+			</td>
+
+			<td>{{ user[4] }}</td>
+
+			<td>
+				{% if user[5] %}
+					{{ user[5] }}
+				{% else %}
+					—
+				{% endif %}
+			</td>
+
+			<td>
+				<form action="/change_password" method="post">
+					<input type="hidden" name="username" value="{{ user[1] }}">
+					<input type="password" name="new_password" placeholder="Новый пароль">
+					<button type="submit">Изменить</button>
+				</form>
+			</td>
+
+			<td>
+				{% if user[1] != "admin" %}
+					<form action="/delete_user" method="post">
+						<input type="hidden" name="username" value="{{ user[1] }}">
+						<button type="submit">Удалить</button>
+					</form>
+				{% else %}
+					системный пользователь
+				{% endif %}
+			</td>
+
+			<td>
+				{% if user[3] == "blocked" %}
+					<form action="/unblock_user" method="post">
+						<input type="hidden" name="username" value="{{ user[1] }}">
+						<button type="submit">Разблокировать</button>
+					</form>
+				{% elif user[3] == "used" %}
+					одноразовый использован
+				{% else %}
+					—
+				{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>   
+
+
+</body>
+</html>

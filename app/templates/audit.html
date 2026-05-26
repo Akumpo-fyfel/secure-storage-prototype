@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Журнал событий</title>
+</head>
+<body>
+    <h1>Журнал событий</h1>
+
+    <p>
+        <a href="/dashboard">Назад</a>
+    </p>
+
+    <form action="/clear_audit" method="post">
+        <button type="submit">Очистить журнал</button>
+    </form>
+
+    <br>
+    
+
+    <table border="1" cellpadding="6">
+        <tr>
+            <th>ID</th>
+            <th>Время</th>
+            <th>Пользователь</th>
+            <th>Событие</th>
+            <th>Объект</th>
+            <th>Имя объекта</th>
+            <th>Результат</th>
+            <th>Детали</th>
+        </tr>
+
+        {% for event in events %}
+        <tr>
+            <td>{{ event[0] }}</td>
+            <td>{{ event[1] }}</td>
+            <td>{{ event[2] }}</td>
+            <td>{{ event[3] }}</td>
+            <td>{{ event[4] }}</td>
+            <td>{{ event[5] }}</td>
+            <td>{{ event[6] }}</td>
+            <td>{{ event[7] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,4 @@
+New-Item -ItemType File storage\encrypted_files\.gitkeep
+New-Item -ItemType File storage\encrypted_file_keys\.gitkeep
+New-Item -ItemType File storage\encrypted_metadata\.gitkeep
+New-Item -ItemType File service\encrypted_master_keys\.gitkeep

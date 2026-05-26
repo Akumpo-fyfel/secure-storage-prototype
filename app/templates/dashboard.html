@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure USB Dashboard</title>
+</head>
+<body>
+    <h1>Secure USB Storage</h1>
+
+    <p>Пользователь: {{ user.username }}</p>
+    <p>Роль: {{ user.role }}</p>
+
+    <h2>Панель управления</h2>
+
+    <ul>
+        {% if user.role == "administrator" %}
+            <li><a href="/users">Администрирование</a></li>
+        {% endif %}
+        <li><a href="/files">Файлы</a></li>
+        {% if user.role == "administrator" %}
+            <li><a href="/audit">Журнал событий</a></li>
+        {% endif %}
+        <li><a href="/logout">Завершить сеанс</a></li>
+    </ul>
+</body>
+</html>

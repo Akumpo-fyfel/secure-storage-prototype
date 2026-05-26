@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+
+# Flask / local settings
+.env
+instance/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Secret keys and trust data
+trust/root_key.bin
+trust/manifest.json
+trust/manifest.hmac
+
+service/encrypted_master_keys/
+service/*.key
+service/*.enc
+
+# User storage
+storage/encrypted_files/*
+storage/encrypted_file_keys/*
+storage/encrypted_metadata/*
+
+# Backups
+rotation_backups/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+!storage/encrypted_files/.gitkeep
+!storage/encrypted_file_keys/.gitkeep
+!storage/encrypted_metadata/.gitkeep
+!service/encrypted_master_keys/.gitkeep

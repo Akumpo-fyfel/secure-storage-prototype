@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Файлы</title>
+</head>
+<body>
+    <h1>Работа с файлами</h1>
+
+    <p><a href="/dashboard">Назад</a></p>
+
+    {% if message %}
+        <p style="color: green;">{{ message }}</p>
+    {% endif %}
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if can_upload %}
+        <h2>Загрузить файлы</h2>
+
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="job_id" id="jobId">
+
+            <input type="file" id="fileInput" name="files" multiple>
+
+            <h3>Выбранные файлы:</h3>
+            <ul id="fileList"></ul>
+
+            <button type="submit" id="uploadButton">Загрузить</button>
+        </form>
+
+        <div id="progressContainer" style="display: none; margin-top: 15px;">
+            <p id="progressMessage">Подготовка...</p>
+
+            <div style="width: 100%; border: 1px solid #333; height: 24px;">
+                <div id="progressBar"
+                    style="width: 0%; height: 100%; background: #4caf50; text-align: center; color: white;">
+                    0%
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const uploadForm = document.getElementById("uploadForm");
+            const uploadButton = document.getElementById("uploadButton");
+            const fileInput = document.getElementById("fileInput");
+            const fileList = document.getElementById("fileList");
+            const jobIdInput = document.getElementById("jobId");
+
+            const progressContainer = document.getElementById("progressContainer");
+            const progressMessage = document.getElementById("progressMessage");
+            const progressBar = document.getElementById("progressBar");
+
+            let selectedFiles = [];
+
+            fileInput.addEventListener("change", function () {
+                selectedFiles = Array.from(fileInput.files);
+                renderFileList();
+            });
+
+            function renderFileList() {
+                fileList.innerHTML = "";
+
+                selectedFiles.forEach((file, index) => {
+                    const li = document.createElement("li");
+
+                    li.textContent = file.name + " (" + file.size + " байт) ";
+
+                    const removeButton = document.createElement("button");
+                    removeButton.type = "button";
+                    removeButton.textContent = "✕";
+
+                    removeButton.onclick = function () {
+                        selectedFiles.splice(index, 1);
+                        updateInputFiles();
+                        renderFileList();
+                    };
+
+                    li.appendChild(removeButton);
+                    fileList.appendChild(li);
+                });
+            }
+
+            function updateInputFiles() {
+                const dataTransfer = new DataTransfer();
+
+                selectedFiles.forEach(file => {
+                    dataTransfer.items.add(file);
+                });
+
+                fileInput.files = dataTransfer.files;
+            }
+
+            function makeJobId() {
+                if (window.crypto && crypto.randomUUID) {
+                    return crypto.randomUUID();
+                }
+
+                return "job_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+            }
+
+            function updateProgress(percent, message) {
+                progressBar.style.width = percent + "%";
+                progressBar.textContent = percent + "%";
+                progressMessage.textContent = message;
+            }
+
+            uploadForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                if (selectedFiles.length === 0) {
+                    alert("Выберите хотя бы один файл");
+                    return;
+                }
+
+                const jobId = makeJobId();
+                jobIdInput.value = jobId;
+
+                progressContainer.style.display = "block";
+                uploadButton.disabled = true;
+                updateProgress(0, "Начало загрузки и шифрования...");
+
+                const formData = new FormData(uploadForm);
+
+                const timer = setInterval(function () {
+                    fetch("/upload_progress/" + jobId)
+                        .then(response => response.json())
+                        .then(data => {
+                            updateProgress(data.percent, data.message);
+                        })
+                        .catch(() => {
+                            progressMessage.textContent = "Ожидание данных о ходе выполнения...";
+                        });
+                }, 500);
+
+                fetch("/files", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    clearInterval(timer);
+                    updateProgress(100, "Загрузка и шифрование завершены");
+
+                    setTimeout(function () {
+                        window.location.href = "/files";
+                    }, 700);
+                })
+                .catch(error => {
+                    clearInterval(timer);
+                    uploadButton.disabled = false;
+                    progressMessage.textContent = "Ошибка загрузки файла";
+                    console.error(error);
+                });
+            });
+        </script>
+    {% endif %}
+
+    {% if can_list %}
+        <h2>Список файлов</h2>
+
+        <table border="1" cellpadding="6">
+            <tr>
+                <th>ID</th>
+                <th>Имя файла</th>
+                <th>Загрузил</th>
+                <th>Дата загрузки</th>
+                <th>Размер</th>
+                <th>Статус</th>
+
+                {% if can_download %}
+                    <th>Скачать</th>
+                {% endif %}
+
+                {% if can_delete %}
+                    <th>Удалить</th>
+                {% endif %}
+            </tr>
+
+            {% for file in files %}
+            <tr>
+                <td>{{ file[0] }}</td>
+                <td>{{ file[2] }}</td>
+                <td>{{ file[3] }}</td>
+                <td>{{ file[4] }}</td>
+                <td>{{ file[5] }} байт</td>
+                <td>{{ file[6] }}</td>
+
+                {% if can_download %}
+                    <td><a href="/download/{{ file[1] }}">Скачать</a></td>
+                {% endif %}
+
+                {% if can_delete %}
+                    <td>
+                        <form action="/delete_file" method="post">
+                            <input type="hidden" name="filename" value="{{ file[1] }}">
+                            <button type="submit">Удалить</button>
+                        </form>
+                    </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>У вашей роли нет доступа к просмотру списка файлов.</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,22 @@
+first run 
+
+python -m venv venv
+.\venv\Scripts\activate
+pip install flask werkzeug
+python app\app.py
+
+
+
+.\venv\Scripts\activate
+
+python app\app.py
+
+
+
+
+
+
+sqlite3 -header -column service\audit.db "SELECT * FROM audit_events;"
+sqlite3 -header -column service\login.db "SELECT * FROM users;"
+sqlite3 -header -column storage\encrypted_metadata\files.db "SELECT * FROM files;"
+sqlite3 -header -column service\access.db "SELECT * FROM access_rules;"
