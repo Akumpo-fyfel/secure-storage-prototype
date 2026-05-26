@@ -56,6 +56,13 @@
               python scripts\scripts_init_db.py  
               python scripts\scripts_init_access_db.py   
               python scripts\scripts_init_files_db.py   
-              python scripts\scripts_init_audit_db.py
+              python scripts\scripts_init_audit_db.py   
+              
+              python trust\init_trust.py  
+              python trust\secure_start.py
+
+              ip addr:   usb0: inet x.x.x.x ---> http://x.x.x.x:5000
+
+              
               
               
